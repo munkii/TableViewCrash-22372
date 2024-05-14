@@ -1,0 +1,965 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ShinyMAUIApp.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:ShinyMAUIApp"
+    x:DataType="local:MainViewModel">
+    <ContentPage.Resources>
+        <Style x:Key="BaseNumberEntryStyle" TargetType="Entry">
+            <Setter Property="FontSize">
+                <OnPlatform x:TypeArguments="x:Double">
+                    <On Platform="iOS" Value="45" />
+                    <On Platform="Android" Value="45" />
+                </OnPlatform>
+            </Setter>
+            <Setter Property="TextColor" Value="{StaticResource DarkColor}" />
+            <Setter Property="Keyboard" Value="Numeric" />
+            <Setter Property="ReturnType" Value="Send" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+            <Setter Property="HorizontalOptions" Value="CenterAndExpand" />
+            <Setter Property="WidthRequest" Value="150" />
+        </Style>
+        <!--  TODO MAUI  -->
+        <!--<Setter Property="BorderColor" Value="{StaticResource LightGreyColor}" />-->
+        <!--<Setter Property="TextAlignment" Value="Center" />-->
+        <!--<Style x:Key="CaptureEntryStyle" TargetType="editors:SfNumericEntry">
+            <Setter Property="TextColor" Value="{StaticResource DarkColor}" />
+
+            <Setter Property="FontFamily" Value="OpenSansSemiBold" />
+            <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+
+            <Setter Property="BackgroundColor" Value="Red" />
+
+
+            <Setter Property="HeightRequest">
+                <OnPlatform x:TypeArguments="x:Double">
+                    <On Platform="iOS" Value="50" />
+                    <On Platform="Android" Value="50" />
+                </OnPlatform>
+            </Setter>
+            <Setter Property="Margin" Value="0" />
+        </Style>-->
+
+
+        <!--  Pages  -->
+        <ControlTemplate x:Key="CapturePageTemplate">
+            <Grid BindingContext="{Binding}">
+
+                <Grid.Padding>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="iOS" Value="10, 44, 10, 20" />
+                        <On Platform="Android" Value="10" />
+                    </OnPlatform>
+                </Grid.Padding>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="8*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Label
+                    Grid.Column="1"
+                    HorizontalTextAlignment="Center"
+                    Style="{StaticResource CaptureTitleLabel}"
+                    Text="{TemplateBinding Parent.Title,
+                                           Converter={StaticResource UpperStringConverter}}"
+                    VerticalOptions="CenterAndExpand" />
+
+                <ImageButton Grid.Column="2" Command="{TemplateBinding Parent.BindingContext.CloseCommand}">
+                    <ImageButton.Source>
+                        <FontImageSource
+                            FontFamily="IconFont"
+                            Glyph="{StaticResource CancelIconText}"
+                            Color="{StaticResource DarkColor}" />
+                    </ImageButton.Source>
+                </ImageButton>
+
+                <ContentPresenter Grid.Row="1" Grid.ColumnSpan="3" />
+            </Grid>
+        </ControlTemplate>
+
+
+
+        <!--  ListViews  -->
+        <Style x:Key="HistoricalListViewStyle" TargetType="ListView">
+            <Setter Property="IsPullToRefreshEnabled" Value="True" />
+            <Setter Property="RowHeight" Value="{StaticResource ListViewRowHeight}" />
+            <Setter Property="BackgroundColor" Value="Transparent" />
+        </Style>
+
+
+
+        <Style x:Key="SettingsStackLayoutStyle" TargetType="StackLayout">
+            <Setter Property="Margin" Value="15,5,15,5" />
+            <Setter Property="VerticalOptions" Value="CenterAndExpand" />
+            <Setter Property="Orientation" Value="Horizontal" />
+        </Style>
+
+        <Style x:Key="SettingsDetailsStackLayoutStyle" TargetType="StackLayout">
+            <Setter Property="Margin" Value="12,0,0,0" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style
+            x:Key="TableViewCellLabelStyle"
+            BasedOn="{StaticResource SemiBoldLabelStyle}"
+            TargetType="Label">
+            <Setter Property="VerticalOptions" Value="CenterAndExpand" />
+            <Setter Property="TextColor" Value="Black" />
+            <Setter Property="FontSize" Value="Small" />
+        </Style>
+
+        <Style
+            x:Key="TableViewCellResultLabelStyle"
+            BasedOn="{StaticResource SemiBoldLabelStyle}"
+            TargetType="Label">
+            <Setter Property="TextColor" Value="{StaticResource DarkGreyColor}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="ViewCellBackground" TargetType="Frame">
+            <Setter Property="Padding" Value="15,5,15,5" />
+            <Setter Property="HasShadow" Value="False" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="BackgroundColor" Value="White" />
+        </Style>
+
+        <Style TargetType="Grid">
+            <Setter Property="ColumnDefinitions">
+                <Setter.Value>
+                    <ColumnDefinitionCollection>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="6*" />
+                        <ColumnDefinition Width="1*" />
+                    </ColumnDefinitionCollection>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Color x:Key="DarkColor">#40515b</Color>
+        <Color x:Key="DarkColor60pc">#9940515b</Color>
+        <Color x:Key="LightGreenColor">#8cc5bf</Color>
+        <Color x:Key="OrangeColor">#fcbb5b</Color>
+        <Color x:Key="LightGreyColor">#cccccc</Color>
+        <Color x:Key="UltraLightGreyColor">#ecedee</Color>
+        <Color x:Key="DarkGreyColor">#777777</Color>
+        <Color x:Key="OffWhite">#F7F7F7</Color>
+        <Color x:Key="FitbitTealColor">#00B0B9</Color>
+        <Color x:Key="DawnBlueColor">#4a638a</Color>
+        <Color x:Key="DawnBlueLighterColor">#4e819d</Color>
+        <Color x:Key="DawnTealColor">#8cc5bf</Color>
+        <Color x:Key="DawnSageColor">#add0b1</Color>
+        <Color x:Key="GaugeLightGreenColor">#667ddbd0</Color>
+        <Color x:Key="GaugeDarkGreenColor">#7ddbd0</Color>
+        <Color x:Key="SignalGreen">#50A53B</Color>
+        <Color x:Key="SignalAmber">#FCBB5B</Color>
+        <Color x:Key="SignalRed">#C3130B</Color>
+
+
+
+        <OnPlatform x:Key="TableViewRowHeight" x:TypeArguments="x:Int32">
+            <On Platform="Android" Value="65" />
+            <On Platform="iOS" Value="60" />
+        </OnPlatform>
+    </ContentPage.Resources>
+    <TableView
+        x:Name="SettingsTable"
+        BackgroundColor="{StaticResource OffWhite}"
+        Intent="Settings"
+        RowHeight="{StaticResource TableViewRowHeight}">
+
+        <TableRoot>
+            <TableSection x:Name="ContactSection" Title="Contacts">
+
+                <!--  TappedCommand="{Binding GoToContactsPageCommand}"  -->
+                <ViewCell Height="{StaticResource TableViewRowHeight}" AutomationId="CallCellId">
+
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource CallIconLabel}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="{local:AppResources Settings_CallTitle}" />
+
+                            <Label
+                                Grid.Column="2"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+
+                </ViewCell>
+
+            </TableSection>
+            <!--  START My devices  -->
+            <!--<TableSection Title="{local:AppResources Settings_MyDevicesTitle}">
+
+            -->
+            <!--  TappedCommand="{Binding DeviceSettingsCommand}"  -->
+            <!--  TappedCommandParameter="{x:Static bluetooth:DeviceType.Spirometer}"  -->
+            <!--
+            <ViewCell>
+
+
+                <Frame Style="{StaticResource ViewCellBackground}">
+                    <Grid>
+                        <Label
+                            FontSize="30"
+                            Style="{StaticResource SpirometerIconLabel}"
+                            VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger
+                                    Binding="{Binding Spirometer.IsPhysicalDevice}"
+                                    TargetType="Label"
+                                    Value="True">
+                                    <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                </DataTrigger>
+                                <DataTrigger
+                                    Binding="{Binding Spirometer.IsPhysicalDevice}"
+                                    TargetType="Label"
+                                    Value="False">
+                                    <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+
+                        <StackLayout Grid.Column="1" Style="{StaticResource SettingsDetailsStackLayoutStyle}">
+                            <Label Style="{StaticResource TableViewCellLabelStyle}" Text="{local:AppResources Settings_SpirometryTitle}" />
+                            <Label
+                                AutomationId="SpirometerSetting"
+                                Style="{StaticResource TableViewCellResultLabelStyle}"
+                                Text="{Binding Spirometer.DeviceDetailText, FallbackValue='SpirobankSmart OXI'}" />
+                        </StackLayout>
+                        <Label
+                            Grid.Column="2"
+                            AutomationId="SpirometerButton"
+                            VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger
+                                    Binding="{Binding Spirometer.IsPhysicalDevice}"
+                                    TargetType="Label"
+                                    Value="True">
+                                    <Setter Property="Style" Value="{StaticResource RightArrowIconLabel}" />
+                                    <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                </DataTrigger>
+                                <DataTrigger
+                                    Binding="{Binding Spirometer.IsPhysicalDevice}"
+                                    TargetType="Label"
+                                    Value="False">
+                                    <Setter Property="Style" Value="{StaticResource PlusAltIconLabel}" />
+                                    <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Grid>
+                </Frame>
+            </ViewCell>
+
+            -->
+            <!--  TappedCommand="{Binding DeviceSettingsCommand}"  -->
+            <!--  TappedCommandParameter="{x:Static bluetooth:DeviceType.Oximeter}"  -->
+            <!--
+            <ViewCell>
+                <Frame Style="{StaticResource ViewCellBackground}">
+                    <Grid>
+
+                        <Label Style="{StaticResource OximeterIconLabel}" VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger
+                                    Binding="{Binding Oximeter.IsPhysicalDevice}"
+                                    TargetType="Label"
+                                    Value="True">
+                                    <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                </DataTrigger>
+                                <DataTrigger
+                                    Binding="{Binding Oximeter.IsPhysicalDevice}"
+                                    TargetType="Label"
+                                    Value="False">
+                                    <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+
+                        <StackLayout Grid.Column="1" Style="{StaticResource SettingsDetailsStackLayoutStyle}">
+                            <Label Style="{StaticResource TableViewCellLabelStyle}" Text="{local:AppResources Settings_OximeterTitle}" />
+                            <Label
+                                AutomationId="OximeterSetting"
+                                Style="{StaticResource TableViewCellResultLabelStyle}"
+                                Text="{Binding Oximeter.DeviceDetailText}" />
+
+                        </StackLayout>
+
+                        <Label
+                            Grid.Column="2"
+                            AutomationId="OximeterButton"
+                            VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger
+                                    Binding="{Binding Oximeter.IsPhysicalDevice}"
+                                    TargetType="Label"
+                                    Value="True">
+                                    <Setter Property="Style" Value="{StaticResource RightArrowIconLabel}" />
+                                    <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                </DataTrigger>
+                                <DataTrigger
+                                    Binding="{Binding Oximeter.IsPhysicalDevice}"
+                                    TargetType="Label"
+                                    Value="False">
+                                    <Setter Property="Style" Value="{StaticResource PlusAltIconLabel}" />
+                                    <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Grid>
+                </Frame>
+            </ViewCell>
+        </TableSection>-->
+            <!--  END My Devices  -->
+
+            <!--  controls:BreatheTableView.SectionFooterText="{Binding ConnectedServicesSyncDate}"  -->
+            <TableSection x:Name="ConnectedServicesSection" Title="{local:AppResources Settings_ConnectedServicesTitle}">
+
+                <!--  TappedCommand="{Binding ClinicalServiceCommand}"  -->
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource ClinicalServicesIconLabel}"
+                                VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToClinicalService}"
+                                        TargetType="Label"
+                                        Value="True">
+                                        <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                    </DataTrigger>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToClinicalService}"
+                                        TargetType="Label"
+                                        Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+
+                            <StackLayout Grid.Column="1" Style="{StaticResource SettingsDetailsStackLayoutStyle}">
+                                <Label Style="{StaticResource TableViewCellLabelStyle}" Text="{local:AppResources Settings_ClinicalServiceTitle}" />
+
+                                <Label Style="{StaticResource TableViewCellResultLabelStyle}">
+                                    <Label.Triggers>
+                                        <DataTrigger
+                                            Binding="{Binding ConnectedToClinicalService}"
+                                            TargetType="Label"
+                                            Value="True">
+                                            <Setter Property="Text" Value="{Binding ClinicalServicesStatusText}" />
+                                        </DataTrigger>
+                                        <DataTrigger
+                                            Binding="{Binding ConnectedToClinicalService}"
+                                            TargetType="Label"
+                                            Value="False">
+                                            <Setter Property="Text" Value="{local:AppResources Settings_NotConnectedTitle}" />
+                                        </DataTrigger>
+                                        <DataTrigger
+                                            Binding="{Binding DisplayClinicalServicesStatusTextAsWarning}"
+                                            TargetType="Label"
+                                            Value="True">
+                                            <Setter Property="TextColor" Value="Red" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </StackLayout>
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="BreatheAccountButton"
+                                VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToClinicalService}"
+                                        TargetType="Label"
+                                        Value="True">
+                                        <Setter Property="Style" Value="{StaticResource RightArrowIconLabel}" />
+                                        <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                    </DataTrigger>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToClinicalService}"
+                                        TargetType="Label"
+                                        Value="False">
+                                        <Setter Property="Style" Value="{StaticResource PlusAltIconLabel}" />
+                                        <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+                <!--  TappedCommand="{Binding FitbitCommand}"  -->
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource IconLabel}"
+                                Text="{StaticResource FitbitLogoIconText}"
+                                VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToFitbit}"
+                                        TargetType="Label"
+                                        Value="True">
+                                        <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                    </DataTrigger>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToFitbit}"
+                                        TargetType="Label"
+                                        Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+                            <StackLayout Grid.Column="1" Style="{StaticResource SettingsDetailsStackLayoutStyle}">
+                                <Label Style="{StaticResource TableViewCellLabelStyle}" Text="{local:AppResources Settings_FitbitTitle}" />
+
+                                <Label Style="{StaticResource TableViewCellResultLabelStyle}">
+                                    <Label.Triggers>
+                                        <DataTrigger
+                                            Binding="{Binding ConnectedToFitbit}"
+                                            TargetType="Label"
+                                            Value="True">
+                                            <Setter Property="Text" Value="Connected" />
+                                        </DataTrigger>
+                                        <DataTrigger
+                                            Binding="{Binding ConnectedToFitbit}"
+                                            TargetType="Label"
+                                            Value="False">
+                                            <Setter Property="Text" Value="{local:AppResources Settings_NotConnectedTitle}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </StackLayout>
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="FitbitButton"
+                                VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToFitbit}"
+                                        TargetType="Label"
+                                        Value="True">
+                                        <Setter Property="Style" Value="{StaticResource RightArrowIconLabel}" />
+                                        <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                    </DataTrigger>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToFitbit}"
+                                        TargetType="Label"
+                                        Value="False">
+                                        <Setter Property="Style" Value="{StaticResource PlusAltIconLabel}" />
+                                        <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+                <!--  TappedCommand="{Binding AppleHealthKitCommand}"  -->
+                <ViewCell x:Name="AppleHealthKitCell">
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+                            <Label
+                                AutomationId="AppleHealthButton"
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource AppleHealthIconLabel}"
+                                VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToAppleHealthKit}"
+                                        TargetType="Label"
+                                        Value="True">
+                                        <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                    </DataTrigger>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToAppleHealthKit}"
+                                        TargetType="Label"
+                                        Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+                            <StackLayout Grid.Column="1" Style="{StaticResource SettingsDetailsStackLayoutStyle}">
+                                <Label Style="{StaticResource TableViewCellLabelStyle}" Text="{local:AppResources Settings_AppleHealthTitle}" />
+                                <Label Style="{StaticResource TableViewCellResultLabelStyle}">
+                                    <Label.Triggers>
+                                        <DataTrigger
+                                            Binding="{Binding ConnectedToAppleHealthKit}"
+                                            TargetType="Label"
+                                            Value="True">
+                                            <Setter Property="Text" Value="Connected" />
+                                        </DataTrigger>
+                                        <DataTrigger
+                                            Binding="{Binding ConnectedToAppleHealthKit}"
+                                            TargetType="Label"
+                                            Value="False">
+                                            <Setter Property="Text" Value="{local:AppResources Settings_AppleHealthNotConnectedTitle}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </StackLayout>
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="AppleHealthAccountButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToAppleHealthKit}"
+                                        TargetType="Label"
+                                        Value="True">
+                                        <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                    </DataTrigger>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToAppleHealthKit}"
+                                        TargetType="Label"
+                                        Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+                <!--  TappedCommand="{Binding GarminCommand}"  -->
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource IconLabel}"
+                                Text="{StaticResource GarminLogoIconText}"
+                                VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToGarmin}"
+                                        TargetType="Label"
+                                        Value="True">
+                                        <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                    </DataTrigger>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToGarmin}"
+                                        TargetType="Label"
+                                        Value="False">
+                                        <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+                            <StackLayout Grid.Column="1" Style="{StaticResource SettingsDetailsStackLayoutStyle}">
+                                <Label Style="{StaticResource TableViewCellLabelStyle}" Text="{local:AppResources Settings_GarminTitle}" />
+
+                                <Label Style="{StaticResource TableViewCellResultLabelStyle}">
+                                    <Label.Triggers>
+                                        <DataTrigger
+                                            Binding="{Binding ConnectedToGarmin}"
+                                            TargetType="Label"
+                                            Value="True">
+                                            <Setter Property="Text" Value="Connected" />
+                                        </DataTrigger>
+                                        <DataTrigger
+                                            Binding="{Binding ConnectedToGarmin}"
+                                            TargetType="Label"
+                                            Value="False">
+                                            <Setter Property="Text" Value="{local:AppResources Settings_NotConnectedTitle}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </StackLayout>
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="GarminButton"
+                                VerticalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToGarmin}"
+                                        TargetType="Label"
+                                        Value="True">
+                                        <Setter Property="Style" Value="{StaticResource RightArrowIconLabel}" />
+                                        <Setter Property="TextColor" Value="{StaticResource LightGreenColor}" />
+                                    </DataTrigger>
+                                    <DataTrigger
+                                        Binding="{Binding ConnectedToGarmin}"
+                                        TargetType="Label"
+                                        Value="False">
+                                        <Setter Property="Style" Value="{StaticResource PlusAltIconLabel}" />
+                                        <Setter Property="TextColor" Value="{StaticResource OrangeColor}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+            </TableSection>
+            <!--  END Connected Services  -->
+
+            <TableSection x:Name="SignalSection" Title="{local:AppResources Settings_SignalTitle}">
+
+                <!--
+                    TappedCommand="{Binding SignalScorePreferencesCommand}"
+                    IsVisible="{Binding ShowSignalSection}" TableSection="{Binding Source={x:Reference Name=SignalSection}}"
+                -->
+
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource SignalScoreSettingsIconLabel}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="Signal" />
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="DataPreferencesButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+            </TableSection>
+
+            <TableSection x:Name="DataSourcesSection" Title="{local:AppResources Settings_DataSourcesTitle}">
+
+                <!--  TappedCommand="{Binding DataSourcePreferencesCommand}"  -->
+
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource DataSourcePreferencesIconLabel}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="{local:AppResources Settings_DataPreferencesTitle}" />
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="DataPreferencesButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+            </TableSection>
+
+
+            <TableSection x:Name="NotificationsSection" Title="{local:AppResources Settings_NotificationsTitle}">
+
+                <!--
+                    TappedCommand="{Binding PushNotificationsCommand}"
+                    
+                    IsVisible="{Binding ShowPushNotificationsSection}"
+                    TableSection="{Binding Source={x:Reference Name=NotificationsSection}}">
+                -->
+
+
+                <ViewCell AutomationId="PushNotificationCell">
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource PushNotificationsIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="{local:AppResources Settings_PushNotificationsTitle}" />
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="PushNotificationsButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+
+            </TableSection>
+
+            <TableSection x:Name="GeneralSection" Title="{local:AppResources Settings_GeneralTitle}">
+
+                <!--  START General  -->
+
+                <!--
+                    TappedCommand="{Binding GoToContactsPageCommand}"
+                    IsVisible="{Binding ShowContactSection}"
+                    TableSection="{Binding Source={x:Reference Name=GeneralSection}}"
+                -->
+
+
+                <ViewCell AutomationId="ContactsCellId">
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+                            <Label
+                                FontSize="20"
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource EmailIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="Contacts" />
+
+                            <Label
+                                Grid.Column="2"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+
+                <!--  TappedCommand="{Binding AboutCommand}"  -->
+
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource IconLabel}"
+                                Text="{StaticResource AboutIconText}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="{local:AppResources Settings_AboutTitle}" />
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="AboutButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+
+
+                <!--
+                    TappedCommand="{Binding OpenHyperLinkCommand}"
+                    TappedCommandParameter="{x:Static constants:AppSettings.UriFaq}"
+                -->
+
+
+                <ViewCell>
+
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource IconLabel}"
+                                Text="{StaticResource FAQIconText}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="{local:AppResources Settings_FaqTitle}" />
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="FAQButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+
+                <!--  TappedCommand="{Binding OpenHyperLinkCommand}" TappedCommandParameter="{x:Static constants:AppSettings.UriPrivacy}"  -->
+
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource IconLabel}"
+                                Text="{StaticResource PrivacyPolicyIconText}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="{local:AppResources Settings_PrivacyPolicyTitle}" />
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="PrivacyPolicyButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+
+                <!--  TappedCommand="{Binding OpenHyperLinkCommand}" TappedCommandParameter="{x:Static constants:AppSettings.UriTermsOfUse}"  -->
+
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource IconLabel}"
+                                Text="{StaticResource TermsOfUseIconText}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="{local:AppResources Settings_TermsOfUseTitle}" />
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="TermsOfUseButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+                <!--  TappedCommand="{Binding GoToDeveloperModePageCommand}" IsVisible="{Binding ShowDeveloperModeSettings}" TableSection="{Binding Source={x:Reference Name=GeneralSection}}"  -->
+
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource IconLabel}"
+                                Text="{StaticResource TermsOfUseIconText}"
+                                VerticalOptions="Center" />
+
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="Developer Mode" />
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="TermsOfUseButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+                <!--  TappedCommand="{Binding GoToAppFixUpsPageCommand}" IsVisible="{Binding ShowAppFixUpsSection}" TableSection="{Binding Source={x:Reference Name=GeneralSection}}"  -->
+
+                <ViewCell>
+                    <Frame Style="{StaticResource ViewCellBackground}">
+                        <Grid>
+
+                            <Label
+                                HorizontalTextAlignment="Center"
+                                Style="{StaticResource DataSourcePreferencesIconLabel}"
+                                VerticalOptions="Center" />
+
+                            <Label
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Style="{StaticResource TableViewCellLabelStyle}"
+                                Text="App Maintenance" />
+
+                            <Label
+                                Grid.Column="2"
+                                AutomationId="DataPreferencesButton"
+                                Style="{StaticResource RightArrowIconLabel}"
+                                TextColor="{StaticResource LightGreenColor}"
+                                VerticalOptions="Center" />
+
+                        </Grid>
+                    </Frame>
+                </ViewCell>
+
+                <!--  END General  -->
+
+
+            </TableSection>
+        </TableRoot>
+    </TableView>
+</ContentPage>
